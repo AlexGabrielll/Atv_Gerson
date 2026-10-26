@@ -53,6 +53,4 @@ O lote e seus equipamentos são criados na mesma transação. A alteração do e
 
 Execute `npm test` e `npm run build`. Os testes usam Fastify inject e um repositório falso. O arquivo `prisma/greencode.db` é criado localmente e está excluído do Git.
 
-O PDF não inclui o código da atividade CLI anterior nem o modelo completo de domínio. Por isso, esta versão estabelece campos essenciais para as cinco entidades solicitadas, adiciona `Usuario` para autenticação e adota os estados `RECEBIDO`, `EM_TRIAGEM`, `EM_REPARO`, `RECICLADO` e `DESCARTADO`. As transições permitidas ficam em `src/servicos/regra-equipamento.ts`.
-
 O CNPJ e o código de barras têm restrição de unicidade no banco. O JWT contém identificador e papel; criação de organizações, contratos e lotes exige papel `ADMIN`, enquanto a mudança de estado exige autenticação. O SQLite simplifica a execução local; o PDF recomenda PostgreSQL como alvo do sistema, então um ambiente de implantação pode exigir portar o provider e gerar migrations para o banco escolhido. Restrições mais específicas do domínio devem ser ajustadas quando o modelo da atividade anterior estiver disponível.
