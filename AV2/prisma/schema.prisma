@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum PapelUsuario {
+  ADMIN
+  OPERADOR
+}
+
+enum EstadoEquipamento {
+  RECEBIDO
+  EM_TRIAGEM
+  EM_REPARO
+  RECICLADO
+  DESCARTADO
+}
+
+model Usuario {
+  id        String      @id @default(uuid())
+  nome      String
+  email     String      @unique
+  senhaHash String
+  papel     PapelUsuario @default(OPERADOR)
+  versao    Int         @default(1)
+  criadoEm  DateTime    @default(now())
+  atualizadoEm DateTime @updatedAt
+}
+
+model Organizacao {
+  id        String      @id @default(uuid())
+  nome      String
+  cnpj      String      @unique
+  versao    Int         @default(1)
+  criadoEm  DateTime    @default(now())
+  atualizadoEm DateTime @updatedAt
+  contrato  Contrato?
+  lotes     Lote[]
+}
+
+model Contrato {
+  id             String      @id @default(uuid())
+  organizacaoId  String      @unique
+  valorMensal    Decimal     @db.Decimal(12, 2)
+  clausulas      Json
+  inicio         DateTime
+  fim            DateTime?
+  versao         Int         @default(1)
+  organizacao    Organizacao @relation(fields: [organizacaoId], references: [id], onDelete: Cascade)
+}
+
+model Lote {
+  id             String        @id @default(uuid())
+  nome           String
+  organizacaoId  String
+  versao         Int           @default(1)
+  criadoEm       DateTime      @default(now())
+  organizacao    Organizacao  @relation(fields: [organizacaoId], references: [id], onDelete: Cascade)
+  equipamentos   Equipamento[]
+}
+
+model Equipamento {
+  id                  String             @id @default(uuid())
+  descricao           String
+  codigoBarrasInterno String             @unique
+  estado              EstadoEquipamento  @default(RECEBIDO)
+  loteId              String
+  versao              Int                @default(1)
+  criadoEm            DateTime           @default(now())
+  atualizadoEm        DateTime           @updatedAt
+  lote                Lote               @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  movimentacoes       Movimentacao[]
+}
+
+model Movimentacao {
+  id               String             @id @default(uuid())
+  equipamentoId    String
+  estadoAnterior   EstadoEquipamento?
+  estadoNovo       EstadoEquipamento
+  observacao       String?
+  versao           Int                @default(1)
+  criadoEm         DateTime           @default(now())
+  equipamento      Equipamento        @relation(fields: [equipamentoId], references: [id], onDelete: Cascade)
+}
