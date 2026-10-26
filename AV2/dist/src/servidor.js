@@ -3,10 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
 const app_1 = require("./app");
 async function iniciar() {
-    const segredo = process.env.JWT_SEGREDO;
-    if (!segredo || segredo.length < 32) {
-        throw new Error('Configure JWT_SEGREDO com pelo menos 32 caracteres');
-    }
+    const segredo = process.env.JWT_SEGREDO ?? 'greencode-segredo-local-apenas-desenvolvimento';
     const app = (0, app_1.criarApp)({ segredoJwt: segredo });
     const porta = Number(process.env.PORTA ?? 3000);
     await app.listen({ port: porta, host: '0.0.0.0' });

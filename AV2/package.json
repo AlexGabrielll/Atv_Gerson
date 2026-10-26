@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "tsx watch src/servidor.ts",
     "build": "tsc",
-    "start": "node dist/servidor.js",
+    "start": "node dist/src/servidor.js",
     "test": "tsx --test testes/*.test.ts",
-    "preparar": "npm run banco:gerar && npm run banco:migrar -- --name inicial && npm run banco:seed",
+    "preparar": "npm run banco:migrar && npm run banco:seed",
+    "configurar": "npm run banco:gerar && npm run preparar && npm run build",
     "banco:gerar": "prisma generate",
-    "banco:migrar": "prisma migrate dev",
+    "banco:migrar": "prisma migrate deploy",
     "banco:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {

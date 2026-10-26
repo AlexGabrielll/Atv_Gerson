@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { EstadoEquipamento, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { mudarEstadoEquipamento } from '../src/repositorios/greencode';
+import { estadosEquipamento } from '../src/servicos/regra-equipamento';
 
 test('rejeita alteração com versão antiga antes de gravar movimentação', async () => {
   let gravouMovimentacao = false;
   const transacao = {
     equipamento: {
-      findUnique: async () => ({ versao: 2, estado: EstadoEquipamento.RECEBIDO })
+      findUnique: async () => ({ versao: 2, estado: estadosEquipamento[0] })
     },
     movimentacao: {
       create: async () => { gravouMovimentacao = true; }
@@ -20,7 +21,7 @@ test('rejeita alteração com versão antiga antes de gravar movimentação', as
   await assert.rejects(
     mudarEstadoEquipamento(bancoFalso, {
       id: 'equipamento-1',
-      estado: EstadoEquipamento.EM_TRIAGEM,
+      estado: estadosEquipamento[1],
       versao: 1
     }),
     (erro: unknown) => erro instanceof Error && 'statusCode' in erro && erro.statusCode === 409

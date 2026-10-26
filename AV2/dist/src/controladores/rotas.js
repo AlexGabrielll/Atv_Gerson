@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registrarRotas = registrarRotas;
-const client_1 = require("@prisma/client");
 const autenticacao_1 = require("../servicos/autenticacao");
 const regra_equipamento_1 = require("../servicos/regra-equipamento");
 const greencode_1 = require("../repositorios/greencode");
@@ -23,13 +22,13 @@ const esquemas = {
                 clausulas: { type: 'object' }, inicio: { type: 'string', format: 'date-time' }, fim: { type: 'string', format: 'date-time' }
             } } },
     estado: { body: { type: 'object', required: ['estado', 'versao'], additionalProperties: false, properties: {
-                estado: { type: 'string', enum: Object.values(client_1.EstadoEquipamento) }, versao: { type: 'integer', minimum: 1 },
+                estado: { type: 'string', enum: regra_equipamento_1.estadosEquipamento }, versao: { type: 'integer', minimum: 1 },
                 observacao: { type: 'string', maxLength: 500 }
             } } }
 };
 function registrarRotas(app, banco) {
     const exigirAdmin = async (pedido, resposta) => {
-        if (pedido.usuario?.papel !== client_1.PapelUsuario.ADMIN) {
+        if (pedido.usuario?.papel !== 'ADMIN') {
             return resposta.code(403).send({ erro: 'Acesso permitido somente para administradores' });
         }
     };
@@ -78,13 +77,16 @@ function registrarRotas(app, banco) {
     });
     app.patch('/equipamentos/:id/estado', { schema: esquemas.estado }, async (pedido, resposta) => {
         const novoEstado = pedido.body.estado;
-        if (!Object.values(client_1.EstadoEquipamento).includes(novoEstado)) {
+        if (!regra_equipamento_1.estadosEquipamento.includes(novoEstado)) {
             return resposta.code(400).send({ erro: 'Estado inválido' });
         }
         try {
             const equipamentoAtual = await banco.equipamento.findUnique({ where: { id: pedido.params.id } });
             if (!equipamentoAtual)
                 return resposta.code(404).send({ erro: 'Equipamento não encontrado' });
+            if (!(0, regra_equipamento_1.ehEstadoEquipamento)(equipamentoAtual.estado)) {
+                return resposta.code(500).send({ erro: 'O equipamento possui um estado inválido no banco' });
+            }
             if (!(0, regra_equipamento_1.podeMudarEstado)(equipamentoAtual.estado, novoEstado)) {
                 return resposta.code(400).send({ erro: 'Transição de estado não permitida' });
             }

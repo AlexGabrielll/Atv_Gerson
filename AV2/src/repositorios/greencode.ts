@@ -1,4 +1,5 @@
-import { EstadoEquipamento, Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { EstadoEquipamento } from '../servicos/regra-equipamento';
 
 export async function criarLoteComEquipamentos(
   banco: PrismaClient,

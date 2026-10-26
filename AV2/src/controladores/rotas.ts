@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { EstadoEquipamento, PapelUsuario, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { validarSenha } from '../servicos/autenticacao';
-import { podeMudarEstado } from '../servicos/regra-equipamento';
+import { ehEstadoEquipamento, EstadoEquipamento, estadosEquipamento, podeMudarEstado } from '../servicos/regra-equipamento';
 import {
   criarContrato,
   criarLoteComEquipamentos,
@@ -27,14 +27,14 @@ const esquemas = {
     clausulas: { type: 'object' }, inicio: { type: 'string', format: 'date-time' }, fim: { type: 'string', format: 'date-time' }
   } } },
   estado: { body: { type: 'object', required: ['estado', 'versao'], additionalProperties: false, properties: {
-    estado: { type: 'string', enum: Object.values(EstadoEquipamento) }, versao: { type: 'integer', minimum: 1 },
+  estado: { type: 'string', enum: estadosEquipamento }, versao: { type: 'integer', minimum: 1 },
     observacao: { type: 'string', maxLength: 500 }
   } } }
 };
 
 export function registrarRotas(app: FastifyInstance, banco: PrismaClient) {
   const exigirAdmin = async (pedido: FastifyRequest, resposta: FastifyReply) => {
-    if (pedido.usuario?.papel !== PapelUsuario.ADMIN) {
+    if (pedido.usuario?.papel !== 'ADMIN') {
       return resposta.code(403).send({ erro: 'Acesso permitido somente para administradores' });
     }
   };
@@ -93,13 +93,16 @@ export function registrarRotas(app: FastifyInstance, banco: PrismaClient) {
     Body: { estado: EstadoEquipamento; versao: number; observacao?: string };
   }>('/equipamentos/:id/estado', { schema: esquemas.estado }, async (pedido, resposta) => {
     const novoEstado = pedido.body.estado;
-    if (!Object.values(EstadoEquipamento).includes(novoEstado)) {
+    if (!estadosEquipamento.includes(novoEstado)) {
       return resposta.code(400).send({ erro: 'Estado inválido' });
     }
 
     try {
       const equipamentoAtual = await banco.equipamento.findUnique({ where: { id: pedido.params.id } });
       if (!equipamentoAtual) return resposta.code(404).send({ erro: 'Equipamento não encontrado' });
+      if (!ehEstadoEquipamento(equipamentoAtual.estado)) {
+        return resposta.code(500).send({ erro: 'O equipamento possui um estado inválido no banco' });
+      }
       if (!podeMudarEstado(equipamentoAtual.estado, novoEstado)) {
         return resposta.code(400).send({ erro: 'Transição de estado não permitida' });
       }

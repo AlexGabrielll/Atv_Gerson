@@ -1,9 +1,19 @@
-export type EstadoEquipamento =
-  | 'RECEBIDO'
-  | 'EM_TRIAGEM'
-  | 'EM_REPARO'
-  | 'RECICLADO'
-  | 'DESCARTADO';
+export const estadosEquipamento = [
+  'RECEBIDO',
+  'EM_TRIAGEM',
+  'EM_REPARO',
+  'RECICLADO',
+  'DESCARTADO'
+] as const;
+
+export type EstadoEquipamento = (typeof estadosEquipamento)[number];
+
+export const papeisUsuario = ['ADMIN', 'OPERADOR'] as const;
+export type PapelUsuario = (typeof papeisUsuario)[number];
+
+export function ehEstadoEquipamento(estado: string): estado is EstadoEquipamento {
+  return estadosEquipamento.includes(estado as EstadoEquipamento);
+}
 
 const proximosEstados: Record<EstadoEquipamento, EstadoEquipamento[]> = {
   RECEBIDO: ['EM_TRIAGEM'],

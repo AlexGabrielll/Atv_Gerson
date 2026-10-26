@@ -1,0 +1,125 @@
+GREENCODE API - COMANDOS
+========================
+
+BASE
+----
+A API usa SQLite no arquivo prisma/greencode.db. Nao precisa iniciar MySQL nem criar o banco manualmente.
+Servidor local: http://localhost:3000
+
+COMANDOS NPM
+------------
+npm install
+  Instala as dependencias do projeto. Normalmente so precisa ser executado uma vez.
+
+npm run configurar
+  Configuracao inicial: gera o Prisma Client, aplica migrations, cria os dados demo e compila a API. Execute com o servidor parado.
+
+npm start
+  Inicia a versao compilada da API. Nao gera arquivos nem compila novamente.
+
+npm run dev
+  Inicia a API em modo de desenvolvimento, com reinicio automatico ao alterar arquivos.
+
+npm test
+  Executa os testes automatizados.
+
+npm run build
+  Compila o TypeScript para a pasta dist.
+
+npm run preparar
+  Aplica migrations pendentes e executa o seed demo. O Prisma Client deve ja estar gerado.
+
+npm run banco:gerar
+  Gera o Prisma Client. Execute com o servidor parado, especialmente no Windows, para evitar bloqueio da DLL.
+
+npm run banco:migrar
+  Aplica migrations pendentes no banco SQLite.
+
+npm run banco:seed
+  Cria ou atualiza os dados de demonstracao.
+
+AUTENTICACAO
+-------------
+Usuario demo:
+  Email: admin@greencode.local
+  Senha: greencode123
+
+As rotas administrativas exigem um token JWT no cabecalho Authorization. Os exemplos abaixo sao para PowerShell e devem ser executados em sequencia.
+
+1. Verificar a API (publico)
+
+Invoke-RestMethod -Method Get -Uri http://localhost:3000/saude
+
+2. Fazer login e guardar o token
+
+$login = Invoke-RestMethod -Method Post -Uri http://localhost:3000/login -ContentType 'application/json' -Body (@{ email = 'admin@greencode.local'; senha = 'greencode123' } | ConvertTo-Json)
+$headers = @{ Authorization = "Bearer $($login.token)" }
+
+3. Criar organizacao (ADMIN)
+
+$organizacao = Invoke-RestMethod -Method Post -Uri http://localhost:3000/organizacoes -Headers $headers -ContentType 'application/json' -Body (@{ nome = 'Coleta Verde'; cnpj = '98765432000100' } | ConvertTo-Json)
+$organizacao
+
+CNPJ deve ter exatamente 14 digitos e ser unico.
+
+4. Criar contrato (ADMIN)
+
+$contrato = Invoke-RestMethod -Method Post -Uri http://localhost:3000/contratos -Headers $headers -ContentType 'application/json' -Body (@{
+  organizacaoId = $organizacao.id
+  valorMensal = 500
+  clausulas = @{ coleta = 'Mensal'; destino = 'Reciclagem certificada' }
+  inicio = (Get-Date).ToUniversalTime().ToString('o')
+} | ConvertTo-Json -Depth 5)
+$contrato
+
+O contrato aceita tambem o campo opcional fim, no formato de data ISO 8601.
+
+5. Criar lote com equipamentos (ADMIN)
+
+$lote = Invoke-RestMethod -Method Post -Uri http://localhost:3000/lotes -Headers $headers -ContentType 'application/json' -Body (@{
+  organizacaoId = $organizacao.id
+  nome = 'Lote de computadores'
+  equipamentos = @(
+    @{ descricao = 'Notebook usado'; codigoBarrasInterno = 'GC-TESTE-001' }
+  )
+} | ConvertTo-Json -Depth 5)
+$lote
+$equipamento = $lote.equipamentos[0]
+
+O codigo de barras interno precisa ser unico. O equipamento novo comeca no estado RECEBIDO e versao 1.
+
+6. Alterar o estado de um equipamento (usuario autenticado)
+
+Invoke-RestMethod -Method Patch -Uri "http://localhost:3000/equipamentos/$($equipamento.id)/estado" -Headers $headers -ContentType 'application/json' -Body (@{
+  estado = 'EM_TRIAGEM'
+  versao = $equipamento.versao
+  observacao = 'Enviado para avaliacao'
+} | ConvertTo-Json)
+
+Use sempre o id e a versao retornados pelo servidor. Cada alteracao incrementa a versao.
+
+ESTADOS E TRANSICOES
+--------------------
+RECEBIDO -> EM_TRIAGEM
+EM_TRIAGEM -> EM_REPARO, RECICLADO ou DESCARTADO
+EM_REPARO -> RECICLADO ou DESCARTADO
+RECICLADO e DESCARTADO sao estados finais.
+
+ROTAS DISPONIVEIS
+-----------------
+GET   /saude                       Publica: verifica se a API esta ativa.
+POST  /login                       Publica: recebe email e senha; retorna token JWT.
+POST  /organizacoes                ADMIN: cria organizacao.
+POST  /contratos                   ADMIN: cria contrato.
+POST  /lotes                       ADMIN: cria lote e equipamentos juntos.
+PATCH /equipamentos/:id/estado      JWT: altera estado e registra movimentacao.
+
+Nao existem rotas GET para listar ou consultar organizacoes, contratos, lotes ou equipamentos nesta versao.
+
+RESPOSTAS DE ERRO COMUNS
+------------------------
+400: dados invalidos ou transicao de estado nao permitida.
+401: token ausente/invalido ou credenciais de login incorretas.
+403: usuario autenticado sem papel ADMIN tentou criar organizacao, contrato ou lote.
+404: equipamento informado nao foi encontrado.
+409: versao enviada esta desatualizada; consulte a versao atual antes de tentar novamente.

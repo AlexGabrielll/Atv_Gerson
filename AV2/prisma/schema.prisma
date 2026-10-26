@@ -3,21 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-}
-
-enum PapelUsuario {
-  ADMIN
-  OPERADOR
-}
-
-enum EstadoEquipamento {
-  RECEBIDO
-  EM_TRIAGEM
-  EM_REPARO
-  RECICLADO
-  DESCARTADO
+  provider = "sqlite"
+  url      = "file:./greencode.db"
 }
 
 model Usuario {
@@ -25,7 +12,7 @@ model Usuario {
   nome      String
   email     String      @unique
   senhaHash String
-  papel     PapelUsuario @default(OPERADOR)
+  papel     String       @default("OPERADOR")
   versao    Int         @default(1)
   criadoEm  DateTime    @default(now())
   atualizadoEm DateTime @updatedAt
@@ -45,7 +32,7 @@ model Organizacao {
 model Contrato {
   id             String      @id @default(uuid())
   organizacaoId  String      @unique
-  valorMensal    Decimal     @db.Decimal(12, 2)
+  valorMensal    Decimal
   clausulas      Json
   inicio         DateTime
   fim            DateTime?
@@ -67,7 +54,7 @@ model Equipamento {
   id                  String             @id @default(uuid())
   descricao           String
   codigoBarrasInterno String             @unique
-  estado              EstadoEquipamento  @default(RECEBIDO)
+  estado              String             @default("RECEBIDO")
   loteId              String
   versao              Int                @default(1)
   criadoEm            DateTime           @default(now())
@@ -79,8 +66,8 @@ model Equipamento {
 model Movimentacao {
   id               String             @id @default(uuid())
   equipamentoId    String
-  estadoAnterior   EstadoEquipamento?
-  estadoNovo       EstadoEquipamento
+  estadoAnterior   String?
+  estadoNovo       String
   observacao       String?
   versao           Int                @default(1)
   criadoEm         DateTime           @default(now())

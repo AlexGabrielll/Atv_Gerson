@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
-import { EstadoEquipamento, PapelUsuario, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const banco = new PrismaClient();
 
@@ -19,7 +19,7 @@ async function popularBanco() {
       nome: 'Administrador de Demonstração',
       email: 'admin@greencode.local',
       senhaHash: hashSenha,
-      papel: PapelUsuario.ADMIN
+      papel: 'ADMIN'
     }
   });
 
@@ -40,9 +40,9 @@ async function popularBanco() {
   }
 
   const equipamentos = [
-    { codigoBarrasInterno: 'GC-DEMO-001', descricao: 'Notebook para triagem', estado: EstadoEquipamento.EM_TRIAGEM },
-    { codigoBarrasInterno: 'GC-DEMO-002', descricao: 'Monitor em reparo', estado: EstadoEquipamento.EM_REPARO },
-    { codigoBarrasInterno: 'GC-DEMO-003', descricao: 'Teclado recebido', estado: EstadoEquipamento.RECEBIDO }
+    { codigoBarrasInterno: 'GC-DEMO-001', descricao: 'Notebook para triagem', estado: 'EM_TRIAGEM' },
+    { codigoBarrasInterno: 'GC-DEMO-002', descricao: 'Monitor em reparo', estado: 'EM_REPARO' },
+    { codigoBarrasInterno: 'GC-DEMO-003', descricao: 'Teclado recebido', estado: 'RECEBIDO' }
   ];
 
   for (const equipamento of equipamentos) {

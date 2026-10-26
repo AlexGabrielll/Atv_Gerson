@@ -1,92 +1,80 @@
 -- CreateTable
-CREATE TABLE `Usuario` (
-    `id` VARCHAR(191) NOT NULL,
-    `nome` VARCHAR(191) NOT NULL,
-    `email` VARCHAR(191) NOT NULL,
-    `senhaHash` VARCHAR(191) NOT NULL,
-    `papel` ENUM('ADMIN', 'OPERADOR') NOT NULL DEFAULT 'OPERADOR',
-    `versao` INTEGER NOT NULL DEFAULT 1,
-    `criadoEm` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `atualizadoEm` DATETIME(3) NOT NULL,
-
-    UNIQUE INDEX `Usuario_email_key`(`email`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE TABLE "Usuario" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "nome" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "senhaHash" TEXT NOT NULL,
+    "papel" TEXT NOT NULL DEFAULT 'OPERADOR',
+    "versao" INTEGER NOT NULL DEFAULT 1,
+    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "atualizadoEm" DATETIME NOT NULL
+);
 
 -- CreateTable
-CREATE TABLE `Organizacao` (
-    `id` VARCHAR(191) NOT NULL,
-    `nome` VARCHAR(191) NOT NULL,
-    `cnpj` VARCHAR(191) NOT NULL,
-    `versao` INTEGER NOT NULL DEFAULT 1,
-    `criadoEm` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `atualizadoEm` DATETIME(3) NOT NULL,
-
-    UNIQUE INDEX `Organizacao_cnpj_key`(`cnpj`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE TABLE "Organizacao" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "nome" TEXT NOT NULL,
+    "cnpj" TEXT NOT NULL,
+    "versao" INTEGER NOT NULL DEFAULT 1,
+    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "atualizadoEm" DATETIME NOT NULL
+);
 
 -- CreateTable
-CREATE TABLE `Contrato` (
-    `id` VARCHAR(191) NOT NULL,
-    `organizacaoId` VARCHAR(191) NOT NULL,
-    `valorMensal` DECIMAL(12, 2) NOT NULL,
-    `clausulas` JSON NOT NULL,
-    `inicio` DATETIME(3) NOT NULL,
-    `fim` DATETIME(3) NULL,
-    `versao` INTEGER NOT NULL DEFAULT 1,
-
-    UNIQUE INDEX `Contrato_organizacaoId_key`(`organizacaoId`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE TABLE "Contrato" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "organizacaoId" TEXT NOT NULL,
+    "valorMensal" DECIMAL NOT NULL,
+    "clausulas" JSONB NOT NULL,
+    "inicio" DATETIME NOT NULL,
+    "fim" DATETIME,
+    "versao" INTEGER NOT NULL DEFAULT 1,
+    CONSTRAINT "Contrato_organizacaoId_fkey" FOREIGN KEY ("organizacaoId") REFERENCES "Organizacao" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 -- CreateTable
-CREATE TABLE `Lote` (
-    `id` VARCHAR(191) NOT NULL,
-    `nome` VARCHAR(191) NOT NULL,
-    `organizacaoId` VARCHAR(191) NOT NULL,
-    `versao` INTEGER NOT NULL DEFAULT 1,
-    `criadoEm` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `Equipamento` (
-    `id` VARCHAR(191) NOT NULL,
-    `descricao` VARCHAR(191) NOT NULL,
-    `codigoBarrasInterno` VARCHAR(191) NOT NULL,
-    `estado` ENUM('RECEBIDO', 'EM_TRIAGEM', 'EM_REPARO', 'RECICLADO', 'DESCARTADO') NOT NULL DEFAULT 'RECEBIDO',
-    `loteId` VARCHAR(191) NOT NULL,
-    `versao` INTEGER NOT NULL DEFAULT 1,
-    `criadoEm` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `atualizadoEm` DATETIME(3) NOT NULL,
-
-    UNIQUE INDEX `Equipamento_codigoBarrasInterno_key`(`codigoBarrasInterno`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE TABLE "Lote" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "nome" TEXT NOT NULL,
+    "organizacaoId" TEXT NOT NULL,
+    "versao" INTEGER NOT NULL DEFAULT 1,
+    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Lote_organizacaoId_fkey" FOREIGN KEY ("organizacaoId") REFERENCES "Organizacao" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 -- CreateTable
-CREATE TABLE `Movimentacao` (
-    `id` VARCHAR(191) NOT NULL,
-    `equipamentoId` VARCHAR(191) NOT NULL,
-    `estadoAnterior` ENUM('RECEBIDO', 'EM_TRIAGEM', 'EM_REPARO', 'RECICLADO', 'DESCARTADO') NULL,
-    `estadoNovo` ENUM('RECEBIDO', 'EM_TRIAGEM', 'EM_REPARO', 'RECICLADO', 'DESCARTADO') NOT NULL,
-    `observacao` VARCHAR(191) NULL,
-    `versao` INTEGER NOT NULL DEFAULT 1,
-    `criadoEm` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+CREATE TABLE "Equipamento" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "descricao" TEXT NOT NULL,
+    "codigoBarrasInterno" TEXT NOT NULL,
+    "estado" TEXT NOT NULL DEFAULT 'RECEBIDO',
+    "loteId" TEXT NOT NULL,
+    "versao" INTEGER NOT NULL DEFAULT 1,
+    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "atualizadoEm" DATETIME NOT NULL,
+    CONSTRAINT "Equipamento_loteId_fkey" FOREIGN KEY ("loteId") REFERENCES "Lote" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
 
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- CreateTable
+CREATE TABLE "Movimentacao" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "equipamentoId" TEXT NOT NULL,
+    "estadoAnterior" TEXT,
+    "estadoNovo" TEXT NOT NULL,
+    "observacao" TEXT,
+    "versao" INTEGER NOT NULL DEFAULT 1,
+    "criadoEm" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Movimentacao_equipamentoId_fkey" FOREIGN KEY ("equipamentoId") REFERENCES "Equipamento" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
 
--- AddForeignKey
-ALTER TABLE `Contrato` ADD CONSTRAINT `Contrato_organizacaoId_fkey` FOREIGN KEY (`organizacaoId`) REFERENCES `Organizacao`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "Usuario_email_key" ON "Usuario"("email");
 
--- AddForeignKey
-ALTER TABLE `Lote` ADD CONSTRAINT `Lote_organizacaoId_fkey` FOREIGN KEY (`organizacaoId`) REFERENCES `Organizacao`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "Organizacao_cnpj_key" ON "Organizacao"("cnpj");
 
--- AddForeignKey
-ALTER TABLE `Equipamento` ADD CONSTRAINT `Equipamento_loteId_fkey` FOREIGN KEY (`loteId`) REFERENCES `Lote`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "Contrato_organizacaoId_key" ON "Contrato"("organizacaoId");
 
--- AddForeignKey
-ALTER TABLE `Movimentacao` ADD CONSTRAINT `Movimentacao_equipamentoId_fkey` FOREIGN KEY (`equipamentoId`) REFERENCES `Equipamento`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "Equipamento_codigoBarrasInterno_key" ON "Equipamento"("codigoBarrasInterno");

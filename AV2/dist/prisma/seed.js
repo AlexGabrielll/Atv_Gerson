@@ -21,7 +21,7 @@ async function popularBanco() {
             nome: 'Administrador de Demonstração',
             email: 'admin@greencode.local',
             senhaHash: hashSenha,
-            papel: client_1.PapelUsuario.ADMIN
+            papel: 'ADMIN'
         }
     });
     await banco.contrato.upsert({
@@ -39,9 +39,9 @@ async function popularBanco() {
         lote = await banco.lote.create({ data: { organizacaoId: organizacao.id, nome: 'Lote de Demonstração' } });
     }
     const equipamentos = [
-        { codigoBarrasInterno: 'GC-DEMO-001', descricao: 'Notebook para triagem', estado: client_1.EstadoEquipamento.EM_TRIAGEM },
-        { codigoBarrasInterno: 'GC-DEMO-002', descricao: 'Monitor em reparo', estado: client_1.EstadoEquipamento.EM_REPARO },
-        { codigoBarrasInterno: 'GC-DEMO-003', descricao: 'Teclado recebido', estado: client_1.EstadoEquipamento.RECEBIDO }
+        { codigoBarrasInterno: 'GC-DEMO-001', descricao: 'Notebook para triagem', estado: 'EM_TRIAGEM' },
+        { codigoBarrasInterno: 'GC-DEMO-002', descricao: 'Monitor em reparo', estado: 'EM_REPARO' },
+        { codigoBarrasInterno: 'GC-DEMO-003', descricao: 'Teclado recebido', estado: 'RECEBIDO' }
     ];
     for (const equipamento of equipamentos) {
         await banco.equipamento.upsert({
