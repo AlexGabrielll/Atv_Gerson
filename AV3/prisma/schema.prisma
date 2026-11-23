@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  apiKeys   ApiKey[]
+  lots      Lot[]
+  reports   AnalyticsReport[]
+}
+
+model ApiKey {
+  id             String        @id @default(cuid())
+  label          String
+  keyHash        String        @unique
+  scopes         String
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+  revokedAt      DateTime?
+
+  @@index([organizationId])
+}
+
+model Lot {
+  id             String        @id @default(cuid())
+  code           String
+  status         String        @default("RECEIVED")
+  operatorName   String?
+  receivedAt     DateTime      @default(now())
+  completedAt    DateTime?
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  equipment      Equipment[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, status])
+}
+
+model Equipment {
+  id                   String               @id @default(cuid())
+  category             String
+  brand                String
+  model                String
+  physicalCondition    String
+  estimatedRecoveryValue Float
+  ageMonths            Int
+  lotId                String?
+  lot                  Lot?                 @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  conditionRecords     ConditionRecord[]
+
+  @@index([category, physicalCondition])
+}
+
+model ConditionRecord {
+  id          String    @id @default(cuid())
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  ageMonths   Int
+  conditionScore Float
+  recordedAt  DateTime  @default(now())
+
+  @@index([equipmentId, recordedAt])
+}
+
+model AnalyticsReport {
+  id             String        @id @default(cuid())
+  type           String
+  status         String        @default("QUEUED")
+  resultJson     String?
+  errorMessage   String?
+  createdAt      DateTime      @default(now())
+  completedAt    DateTime?
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+}

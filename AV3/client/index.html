@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b3328" />
+    <title>Greencode | Painel</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/" aria-label="Greencode início">
+          <span class="brand-mark">G</span>
+          <span>greencode<span class="brand-dot">.</span></span>
+        </a>
+        <span class="nav-caption">ESPAÇO DE TRABALHO</span>
+        <nav class="side-nav" aria-label="Navegação do painel">
+          <a href="#access"><span>01</span> Acesso e parceiros</a>
+          <a href="#operations"><span>02</span> Operação de lotes</a>
+          <a href="#analytics"><span>03</span> Análises</a>
+          <a href="#reports"><span>04</span> Relatórios</a>
+        </nav>
+        <div class="sidebar-footer">
+          <span class="sidebar-dot"></span>
+          <span>GREENCODE · API v1</span>
+        </div>
+      </aside>
+
+      <div class="main-area">
+        <header class="topbar">
+          <span class="breadcrumb">Painel <b>/</b> Visão geral</span>
+          <div class="topbar-right">
+            <a class="docs-link" href="/docs" target="_blank" rel="noreferrer">Documentação API ↗</a>
+            <span class="connection"><i></i> Backend local</span>
+          </div>
+        </header>
+
+      <main class="content">
+        <section class="intro">
+          <div>
+            <p class="eyebrow">LOGÍSTICA REVERSA · PAINEL OPERACIONAL</p>
+            <h1>Operação clara.<br /><span>Decisões melhores.</span></h1>
+            <p class="intro-copy">Acompanhe cada etapa do fluxo reverso e transforme os dados dos equipamentos em valor.</p>
+          </div>
+          <div class="intro-stats">
+            <span class="stat-kicker">PLATAFORMA</span>
+            <strong>GREENCODE <b>01</b></strong>
+            <span>Rastreabilidade · Análise · Recuperação</span>
+          </div>
+        </section>
+
+        <section class="notice-row" aria-live="polite">
+          <div id="notice" class="notice">Conecte uma chave de API para usar o painel.</div>
+        </section>
+
+        <section id="access" class="page-section">
+          <div class="section-heading">
+            <div><span class="step">01 / ACESSO</span><h2>Parceiros e permissões</h2></div>
+            <p>Crie uma credencial controlada para cada integração.</p>
+          </div>
+          <article class="panel panel-dark">
+            <div class="panel-heading">
+              <div><h3>Gerenciar chave de API</h3><p>O token administrativo autoriza a criação e a revogação.</p></div>
+              <span class="panel-icon">01</span>
+            </div>
+            <div class="access-grid">
+              <form id="key-form" class="stack">
+                <label>Token administrativo<input id="admin-token" type="password" placeholder="ADMIN_TOKEN do .env" required /></label>
+                <div class="two-col tight">
+                  <label>ID da organização<input id="organization-id" value="greencode-demo" required /></label>
+                  <label>Identificação do parceiro<input id="key-label" value="Parceiro Greencode" required /></label>
+                </div>
+                <fieldset class="scope-list">
+                  <legend>Permissões concedidas</legend>
+                  <label><input type="checkbox" name="scope" value="tracking:read" checked /> Rastreabilidade</label>
+                  <label><input type="checkbox" name="scope" value="lots:write" checked /> Criar e atualizar lotes</label>
+                  <label><input type="checkbox" name="scope" value="analytics:read" checked /> Análises</label>
+                  <label><input type="checkbox" name="scope" value="reports:write" checked /> Solicitar relatórios</label>
+                  <label><input type="checkbox" name="scope" value="reports:read" checked /> Consultar relatórios</label>
+                </fieldset>
+                <button class="button button-light" type="submit">Criar chave de parceiro <span>↗</span></button>
+              </form>
+              <div class="credential-box">
+                <span class="credential-label">CREDENCIAL DA SESSÃO</span>
+                <label>Chave de API<input id="api-key" type="password" autocomplete="off" placeholder="Cole ou crie uma chave" /></label>
+                <p class="hint">O segredo é exibido uma vez. Copie-o antes de sair desta página.</p>
+                <label>ID da chave<input id="api-key-id" placeholder="Preenchido após criar" /></label>
+                <button id="revoke-key" class="button button-outline" type="button">Revogar chave</button>
+                <div class="inline-note">Use permissões mínimas necessárias. A revogação é imediata.</div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section id="operations" class="page-section">
+          <div class="section-heading">
+            <div><span class="step">02 / OPERAÇÃO</span><h2>Entrada e acompanhamento</h2></div>
+            <p>Cadastre o equipamento e mantenha o histórico do lote atualizado.</p>
+          </div>
+          <div class="operations-grid">
+          <article class="panel">
+            <div class="panel-heading">
+              <div><h3>Registrar novo lote</h3><p>Um lote começa com o equipamento recebido.</p></div>
+              <span class="panel-icon">02A</span>
+            </div>
+            <form id="lot-form" class="stack">
+              <label>Código do lote<input id="lot-code" placeholder="LOTE-2026-001" required /></label>
+              <div class="two-col tight">
+                <label>Categoria<input id="category" value="Notebook" required /></label>
+                <label>Operador<input id="operator" placeholder="Nome do operador" /></label>
+              </div>
+              <div class="two-col tight">
+                <label>Marca<input id="brand" placeholder="Marca" required /></label>
+                <label>Modelo<input id="model" placeholder="Modelo" required /></label>
+              </div>
+              <div class="three-col">
+                <label>Condição<select id="condition"><option>EXCELLENT</option><option selected>GOOD</option><option>FAIR</option><option>POOR</option><option>UNSERVICEABLE</option></select></label>
+                <label>Valor estimado<input id="recovery-value" type="number" min="0" step="0.01" value="0" required /></label>
+                <label>Idade (meses)<input id="age-months" type="number" min="0" value="12" required /></label>
+              </div>
+              <button class="button button-green" type="submit">Cadastrar lote <span>↗</span></button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <div class="panel-heading">
+              <div><h3>Atualizar e consultar</h3><p>Use o código do lote para registrar a movimentação.</p></div>
+              <span class="panel-icon">02B</span>
+            </div>
+            <form id="status-form" class="stack compact">
+              <label>Código do lote<input id="status-code" placeholder="LOTE-2026-001" required /></label>
+              <div class="two-col tight">
+                <label>Nova etapa<select id="lot-status"><option>RECEIVED</option><option>TRIAGING</option><option>COMPLETED</option></select></label>
+                <label>Operador<input id="status-operator" placeholder="Nome" /></label>
+              </div>
+              <button class="button button-green" type="submit">Atualizar etapa</button>
+            </form>
+            <form id="tracking-form" class="stack compact separated">
+              <label>Consultar rastreabilidade<input id="tracking-code" placeholder="Código do lote" required /></label>
+              <button class="button button-outline" type="submit">Buscar lote</button>
+            </form>
+            <form id="condition-form" class="stack compact separated">
+              <div class="two-col tight">
+                <label>Código do lote<input id="condition-code" placeholder="Código associado" required /></label>
+                <label>ID do equipamento<input id="equipment-id" placeholder="Preenchido ao cadastrar lote" required /></label>
+              </div>
+              <div class="two-col tight">
+                <label>Idade (meses)<input id="condition-age" type="number" min="0" value="24" required /></label>
+                <label>Condição<select id="condition-value"><option>EXCELLENT</option><option>GOOD</option><option selected>FAIR</option><option>POOR</option><option>UNSERVICEABLE</option></select></label>
+              </div>
+              <button class="button button-outline" type="submit">Registrar condição histórica</button>
+            </form>
+          </article>
+          </div>
+        </section>
+
+        <section id="analytics" class="page-section">
+          <div class="section-heading">
+            <div><span class="step">03 / INTELIGÊNCIA</span><h2>Análises da operação</h2></div>
+            <p>Compare resultados por operador, equipamento e condição.</p>
+          </div>
+          <article class="panel">
+            <div class="panel-heading">
+              <div><h3>Indicadores do Greencode</h3><p>Os resultados são calculados para a organização da chave ativa.</p></div>
+              <span class="panel-icon">03</span>
+            </div>
+            <div class="analytics-actions">
+              <button class="metric-button" data-analytics="efficiency"><span>01</span><b>Eficiência operacional</b><small>Tempo por operador e período</small></button>
+              <button class="metric-button" data-analytics="profitability"><span>02</span><b>Rentabilidade</b><small>Recuperação por tipo e estado</small></button>
+              <button class="metric-button" data-analytics="useful-life"><span>03</span><b>Vida útil remanescente</b><small>Projeção por regressão linear</small></button>
+            </div>
+            <pre id="analytics-output" class="output empty">Selecione uma análise para visualizar os resultados.</pre>
+          </article>
+        </section>
+
+        <section id="reports" class="page-section">
+          <div class="section-heading">
+            <div><span class="step">04 / EXPORTAÇÃO</span><h2>Relatórios</h2></div>
+            <p>Gere resultados completos em segundo plano.</p>
+          </div>
+          <div class="reports-grid">
+          <article class="panel">
+            <div class="panel-heading">
+              <div><h3>Solicitar relatório analítico</h3><p>O painel acompanha o status até a conclusão.</p></div>
+              <span class="panel-icon">04</span>
+            </div>
+            <form id="report-form" class="stack">
+              <label>Tipo de relatório<select id="report-type"><option value="all">Completo</option><option value="efficiency">Eficiência</option><option value="profitability">Rentabilidade</option><option value="useful-life">Vida útil</option></select></label>
+              <button class="button button-green" type="submit">Gerar relatório</button>
+            </form>
+            <div id="report-status" class="report-status">Os resultados ficam disponíveis no histórico quando o processamento terminar.</div>
+            <pre id="report-output" class="output small-output empty"></pre>
+          </article>
+
+          <aside class="guide-card">
+            <span class="step">FLUXO RECOMENDADO</span>
+            <h3>Do recebimento à decisão.</h3>
+            <ol class="steps-list">
+              <li>Crie uma chave com as permissões adequadas.</li>
+              <li>Cadastre o lote e registre sua condição.</li>
+              <li>Atualize a triagem e consulte os indicadores.</li>
+            </ol>
+            <p class="hint">Relatórios assíncronos precisam do Redis e do worker ativos.</p>
+          </aside>
+          </div>
+        </section>
+      </main>
+      <footer class="content"><span>GREENCODE · LOGÍSTICA REVERSA</span><span>API v1 · 2026</span></footer>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
